@@ -24,12 +24,14 @@ export interface AgentVoiceResponse {
 
 export interface Voice {
   id: number;
-  created_at: string;
-  description: string;
-  gender: string;
-  is_active: boolean;
-  language: string;
+  provider: string;
+  elevenlabs_voice_id: string;
   name: string;
+  gender: string;
+  preview_url: string;
+  description: string;
+  language: string;
+  created_at: string;
 }
 
 export interface AgentPhoneNumber {
