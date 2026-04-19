@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { Activity, ChevronDown, DollarSign, House, Menu, Phone, TrendingUp, TvMinimal, Users, X } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Activity, ChevronDown, DollarSign, House, LogOut, Menu, Phone, TrendingUp, TvMinimal, Users, X } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { useAppDispatch } from "@/store/hook";
+import { logout } from "@/store/features/auth/auth.slice";
 
 const navLinks = [
     { scrollTo: "home", label: "Overview", icon: <House size={20} /> },
@@ -15,6 +17,14 @@ const navLinks = [
 export const SuperAdminSidebar: React.FC = () => {
     const [activeTab, setActiveTab] = useState("home");
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+    const dispatch = useAppDispatch();
+    const navigate = useNavigate();
+
+    const handleLogout = () => {
+        dispatch(logout());
+        setIsMobileMenuOpen(false);
+        navigate("/login");
+    };
 
     const scrollToSection = (id: string) => {
         const element = document.getElementById(id);
@@ -89,6 +99,14 @@ export const SuperAdminSidebar: React.FC = () => {
                                 <span>{link.label}</span>
                             </button>
                         ))}
+                        <button
+                            type="button"
+                            onClick={handleLogout}
+                            className="mt-4 flex items-center gap-2 p-2 rounded-2xl text-[#f87171] hover:bg-red-500/10 hover:text-red-300 transition-all cursor-pointer"
+                        >
+                            <LogOut size={20} />
+                            <span>Logout</span>
+                        </button>
                     </div>
                 </div>
             )}
@@ -122,10 +140,15 @@ export const SuperAdminSidebar: React.FC = () => {
                     })}
                 </div>
 
-                <div className="mt-auto group">
-                    <div className="w-8 h-8 rounded-full bg-linear-to-tr from-pink-500 to-rose-400 flex items-center justify-center text-xs font-bold text-white cursor-pointer hover:ring-2 hover:ring-pink-500/50 transition-all">
-                        A
-                    </div>
+                <div className="mt-auto pb-2">
+                    <button
+                        type="button"
+                        onClick={handleLogout}
+                        title="Logout"
+                        className="p-3 rounded-xl text-[#f87171] opacity-80 hover:opacity-100 hover:bg-red-500/10 transition-all cursor-pointer"
+                    >
+                        <LogOut size={22} />
+                    </button>
                 </div>
             </div>
         </>

@@ -3,7 +3,8 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Link, useNavigate } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "@/store/hook";
-import { selectUser, setUser } from "@/store/features/auth/auth.slice";
+import { selectUser, selectToken, setUser, logout } from "@/store/features/auth/auth.slice";
+import { homePathForUser } from "@/auth/access";
 import { useEffect, useState } from "react";
 import { ArrowRight, Eye, EyeOff, Loader2 } from "lucide-react";
 import { FcGoogle } from "react-icons/fc";
@@ -36,17 +37,33 @@ const LoginCHYR = () => {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const user = useAppSelector(selectUser);
+  const token = useAppSelector(selectToken);
 
-  console.log(user);
+  // Already logged in? Skip login page — go to your home (after logout you can open /login again).
+  useEffect(() => {
+    if (!user || !token) return;
+    const home = homePathForUser(user);
+    if (home) {
+      navigate(home, { replace: true });
+      return;
+    }
+    dispatch(logout());
+  }, [user, token, navigate, dispatch]);
 
   const onSubmit = async (data: LoginFormInputs) => {
     try {
       const res = await login(data);
-      console.log("res is comming :", res);
-      if (res) {
-        dispatch(setUser(res?.data));
+      if ("data" in res && res.data) {
+        dispatch(setUser(res.data));
         toast.success("Login Successful");
-        navigate("/create-agent");
+        const path = homePathForUser(res.data?.user);
+        if (path) {
+          navigate(path);
+        } else {
+          dispatch(logout());
+          toast.error("Not authorized");
+          navigate("/login", { replace: true });
+        }
       } else {
         toast.error("Login Failed");
       }

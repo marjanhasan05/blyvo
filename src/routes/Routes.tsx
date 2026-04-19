@@ -37,6 +37,7 @@ import ManageFeature from "@/pages/SuperAdmin/ManageFeature";
 import ManagePlan from "@/pages/SuperAdmin/ManagePlan";
 import PaymentSuccess from "@/pages/PaymentSuccess";
 import PaymentFailed from "@/pages/PaymentFailed";
+import ProtectedRoute from "./ProtectedRoute";
 
 // Simple wrapper that provides the landing config to all routes
 const RootProvider = () => {
@@ -101,95 +102,66 @@ const routes = createBrowserRouter([
       },
       {
         path: "/dashboard",
-        element: <DashboardLayoutTwo />,
+        element: <ProtectedRoute allowedRoles={["org_admin"]} />,
         children: [
           {
-            index: true,
-            element: <DashboardTwoHome />,
-          },
-          {
-            path: "agents",
-            element: <Agents />,
-          },
-          {
-            path: "calls-log",
-            element: <CallsLog />,
-          },
-          {
-            path: "business",
-            element: <DashboardBusinessInfoPage />,
-          },
-          {
-            path: "services",
-            element: <DashboardBusinessServicesPage />,
-          },
-          {
-            path: "pricing",
-            element: <Pricing />,
-          },
-          {
-            path: "settings",
-            element: <SettingsPage />,
+            element: <DashboardLayoutTwo />,
+            children: [
+              {
+                index: true,
+                element: <DashboardTwoHome />,
+              },
+              {
+                path: "agents",
+                element: <Agents />,
+              },
+              {
+                path: "calls-log",
+                element: <CallsLog />,
+              },
+              {
+                path: "business",
+                element: <DashboardBusinessInfoPage />,
+              },
+              {
+                path: "services",
+                element: <DashboardBusinessServicesPage />,
+              },
+              {
+                path: "pricing",
+                element: <Pricing />,
+              },
+              {
+                path: "settings",
+                element: <SettingsPage />,
+              },
+            ],
           },
         ],
       },
-      // {
-      //   element: <ProtectedRoute />,
-      //   children: [
-      //     {
-      //       path: "/dashboard",
-      //       element: <DashboardLayout />,
-      //       children: [
-      //         {
-      //           index: true,
-      //           element: <DashboardHome />,
-      //         },
-      //         {
-      //           path: "about",
-      //           element: <DashboardAboutPage />,
-      //         },
-      //         {
-      //           path: "business",
-      //           element: <DashboardBusinessInfoPage />,
-      //         },
-      //         {
-      //           path: "businessServices/:serviceId",
-      //           element: <DashboardBusinessServicesPage />,
-      //         },
-      //         {
-      //           path: "phone",
-      //           element: <DashboardPhone />,
-      //         },
-      //         {
-      //           path: "integrations",
-      //           element: <DashboardIntegration />,
-      //         },
-      //         {
-      //           path: "settings",
-      //           element: <DashboardSettings />,
-      //         },
-      //       ],
-      //     },
       {
         path: "/super-admin",
-        element: <SuperAdminLayout />,
+        element: <ProtectedRoute allowedRoles={["super_admin"]} />,
         children: [
           {
-            index: true,
-            element: <SuperAdmin />,
-          },
-          {
-            path: "manage-feature",
-            element: <ManageFeature />,
-          },
-          {
-            path: "manage-plan",
-            element: <ManagePlan />,
+            element: <SuperAdminLayout />,
+            children: [
+              {
+                index: true,
+                element: <SuperAdmin />,
+              },
+              {
+                path: "manage-feature",
+                element: <ManageFeature />,
+              },
+              {
+                path: "manage-plan",
+                element: <ManagePlan />,
+              },
+            ],
           },
         ],
       },
-      //   ],
-      // },
       {
         path: "/payment-success",
         element: <PaymentSuccess />,
