@@ -206,6 +206,7 @@ const SignupCHYR = () => {
       await verifyOTP({
         purpose: "registration",
         user_identifier: data.email,
+        password: data.password,
       }).unwrap();
 
       // Success: store form data and open OTP modal

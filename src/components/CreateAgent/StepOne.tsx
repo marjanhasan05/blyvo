@@ -95,14 +95,9 @@ const StepOne = ({ register, errors, onSubmit }: StepOneProps) => {
             <button
               type="submit"
               className={`a w-full  p-4 rounded-[10px] transition-all flex items-center justify-center gap-3  group cursor-pointer text-base md:text-lg bg-white hover:opacity-90 hover:${config?.colors.brandColor}`}
-              onClick={() =>
-                dispatch(
-                  setBusinessEmailAndWebsite({
-                    business_email: email,
-                    business_website: website,
-                  }),
-                )
-              }
+              // onClick={() =>
+
+              // }
             >
               Create Agent{" "}
               <Play
