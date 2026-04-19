@@ -1,8 +1,12 @@
-import { Play } from "lucide-react";
+import { Pause, Play } from "lucide-react";
 import { IoMale, IoFemale } from "react-icons/io5";
-import { useGetAllAgentQuery, useSelectAgentMutation } from "@/store/features/agent/agent.api";
+import {
+  useGetAllAgentQuery,
+  useSelectAgentMutation,
+} from "@/store/features/agent/agent.api";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
+import { useRef, useState } from "react";
 
 const VoiceSkeleton = () => (
   <div className="flex-1 bg-[linear-gradient(180deg,#112A3A_0%,#0F2A3A_100%)] rounded-[14px] p-6 flex flex-col border border-transparent min-w-75">
@@ -25,21 +29,65 @@ const VoiceSkeleton = () => (
 const VoiceSelector = () => {
   const { data: agentVoices, isLoading, isError } = useGetAllAgentQuery();
   const [selectAgent, { isLoading: isUpdating }] = useSelectAgentMutation();
+  const [playingId, setPlayingId] = useState<number | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  const handleToggleActive = async (agentVoiceId: number, currentActive: boolean) => {
-    if (currentActive) return; // Already active
-
+  const handleToggleActive = async (
+    agentVoiceId: number,
+    currentActive: boolean,
+  ) => {
+    if (currentActive) return;
     try {
       await selectAgent({
-        data: {
-          id: agentVoiceId,
-          is_active: true,
-        },
+        data: { id: agentVoiceId, is_active: true },
       }).unwrap();
       toast.success("Voice updated successfully");
     } catch (error) {
       toast.error("Failed to update voice");
       console.error("Select agent error:", error);
+    }
+  };
+
+  const handlePlayPreview = (voiceId: number, previewUrl: string) => {
+    // If the clicked voice is already playing, pause it
+    if (playingId === voiceId) {
+      audioRef.current?.pause();
+      setPlayingId(null);
+      return;
+    }
+
+    // Stop any currently playing audio
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current = null;
+    }
+
+    // Create and play new audio
+    try {
+      const audio = new Audio(previewUrl);
+      audioRef.current = audio;
+
+      audio.play().catch((err) => {
+        toast.error("Unable to play audio preview");
+        console.error("Audio playback error:", err);
+        setPlayingId(null);
+      });
+
+      audio.onended = () => {
+        setPlayingId(null);
+        audioRef.current = null;
+      };
+
+      audio.onerror = () => {
+        toast.error("Failed to load audio preview");
+        setPlayingId(null);
+        audioRef.current = null;
+      };
+
+      setPlayingId(voiceId);
+    } catch (error) {
+      toast.error("Audio preview unavailable");
+      console.error("Audio setup error:", error);
     }
   };
 
@@ -61,6 +109,7 @@ const VoiceSelector = () => {
         WebkitBackdropFilter: "blur(20px)",
       }}
     >
+      {/* Header unchanged */}
       <div className="flex justify-between items-start mb-9">
         <div>
           <h2 className="text-[34px] font-bold m-0 mb-2 text-white leading-none">
@@ -86,6 +135,8 @@ const VoiceSelector = () => {
             if (!voice) return null;
 
             const isActive = agentVoice.is_active;
+            const isPlaying = playingId === voice.id;
+            const hasPreview = !!voice.preview_url;
 
             return (
               <div
@@ -94,6 +145,7 @@ const VoiceSelector = () => {
                   isActive ? "border-white/20 shadow-lg" : "border-transparent"
                 }`}
               >
+                {/* Header with name and active badge unchanged */}
                 <div className="flex justify-between items-center mb-1.5">
                   <h3 className="text-[24px] font-normal m-0 text-white leading-none">
                     {voice.name}
@@ -109,6 +161,7 @@ const VoiceSelector = () => {
                   {voice.description || "Sophisticated AI Voice"}
                 </p>
 
+                {/* Gender and language badges unchanged */}
                 <div className="flex gap-1.5 mb-6">
                   <div className="flex items-center bg-white/20 justify-center rounded gap-1 text-[#99F7FE] py-1 px-3 text-xs font-medium">
                     {voice.gender?.toLowerCase() === "male" ? (
@@ -123,17 +176,39 @@ const VoiceSelector = () => {
                   </div>
                 </div>
 
-                <button className="w-full flex items-center bg-white/5 border-none rounded-lg py-3 px-4 text-[#E2E8F0] text-[13px] font-normal cursor-pointer transition-colors duration-200 gap-3 mb-6 hover:bg-white/10">
+                {/* Preview button with integrated audio */}
+                <button
+                  onClick={() =>
+                    hasPreview &&
+                    handlePlayPreview(voice.id, voice.preview_url!)
+                  }
+                  disabled={!hasPreview}
+                  className={`w-full flex items-center bg-white/5 border-none rounded-lg py-3 px-4 text-[#E2E8F0] text-[13px] font-normal transition-colors duration-200 gap-3 mb-6 ${
+                    hasPreview
+                      ? "cursor-pointer hover:bg-white/10"
+                      : "cursor-not-allowed opacity-60"
+                  }`}
+                >
                   <div className="flex items-center justify-center w-6 h-6 rounded-full border border-white/80 shrink-0">
-                    <Play size={12} fill="currentColor" />
+                    {isPlaying ? (
+                      <Pause size={12} fill="currentColor" />
+                    ) : (
+                      <Play size={12} fill="currentColor" />
+                    )}
                   </div>
-                  <span className="whitespace-nowrap">Preview Voice</span>
+                  <span className="whitespace-nowrap">
+                    {isPlaying ? "Playing Preview" : "Preview Voice"}
+                  </span>
                   <div className="flex items-center gap-0.5 ml-auto h-3">
                     {[4, 8, 14, 10, 16, 6, 8, 12, 5].map((height, i) => (
                       <span
                         key={i}
-                        className={`w-0.5 rounded-[1px] opacity-70 ${
-                          isActive ? "bg-[#22C55E]" : "bg-[#38BDF8]"
+                        className={`w-0.5 rounded-[1px] opacity-70 transition-colors ${
+                          isActive
+                            ? "bg-[#22C55E]"
+                            : isPlaying
+                              ? "bg-[#38BDF8]"
+                              : "bg-[#38BDF8]"
                         }`}
                         style={{ height: `${height}px` }}
                       ></span>
@@ -141,6 +216,7 @@ const VoiceSelector = () => {
                   </div>
                 </button>
 
+                {/* Active toggle switch unchanged */}
                 <div className="flex justify-between items-center mt-auto">
                   <span className="text-[13px] text-[#A0B3C6]">
                     Set as active
@@ -151,7 +227,9 @@ const VoiceSelector = () => {
                       className="sr-only peer"
                       checked={isActive}
                       disabled={isUpdating}
-                      onChange={() => handleToggleActive(agentVoice.id, isActive)}
+                      onChange={() =>
+                        handleToggleActive(agentVoice.id, isActive)
+                      }
                     />
                     <div className="absolute inset-0 bg-transparent border-[1.5px] border-white transition-colors duration-300 rounded-full peer-checked:border-[#22C55E]"></div>
                     <div className="absolute left-0.75 top-0.75 w-3.5 h-3.5 bg-white rounded-full transition-all duration-300 peer-checked:translate-x-4 peer-checked:bg-[#22C55E]"></div>
