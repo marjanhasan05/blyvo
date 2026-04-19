@@ -3,9 +3,6 @@ import { Link } from "react-router-dom";
 import { FiChevronRight } from "react-icons/fi";
 import { Play } from "lucide-react";
 import { useLandingConfig } from "@/contexts/LandingConfigContext";
-import { useDispatch } from "react-redux";
-import { useState } from "react";
-import { setBusinessEmailAndWebsite } from "@/store/features/business/business.slice";
 
 interface StepOneProps {
   register: UseFormRegister<{
@@ -27,9 +24,6 @@ const inputBoxClass =
 // const buttonClass = "bg-white hover:bg-[#5D5FEF] text-black";
 
 const StepOne = ({ register, errors, onSubmit }: StepOneProps) => {
-  const dispatch = useDispatch();
-  const [email, setEmail] = useState("");
-  const [website, setWebsite] = useState("");
   const { config } = useLandingConfig();
   return (
     <>
@@ -66,7 +60,7 @@ const StepOne = ({ register, errors, onSubmit }: StepOneProps) => {
               {...register("email")}
               className={inputBoxClass}
               required
-              onChange={(e) => setEmail(e.target.value)}
+              // onChange={(e) => setEmail(e.target.value)}
             />
             {errors.email && (
               <p className="text-red-500 text-[10px] mt-1 ml-4 absolute">
@@ -82,7 +76,7 @@ const StepOne = ({ register, errors, onSubmit }: StepOneProps) => {
               {...register("website")}
               className={inputBoxClass}
               required
-              onChange={(e) => setWebsite(e.target.value)}
+              // onChange={(e) => setWebsite(e.target.value)}
             />
             {errors.website && (
               <p className="text-red-500 text-[10px] mt-1 ml-4 absolute">
