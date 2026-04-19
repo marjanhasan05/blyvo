@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Bell, Menu, Search, X, User, Settings, LogOut } from "lucide-react";
 import CommonWrapper from "@/common/CommonWrapper";
 import { CHYRIcon } from "@/assets/logo/BrandLogoNew";
@@ -9,6 +9,7 @@ import { logout } from "@/store/features/auth/auth.slice";
 
 const NavbarTwo: React.FC = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -252,25 +253,61 @@ const NavbarTwo: React.FC = () => {
                 : "translate-y-10 opacity-0"
                 }`}
             >
-              <Link
-                to="/login"
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="text-center py-5 text-white/90 font-bold text-xl border border-white/10 rounded-2xl bg-white/5 hover:bg-white/10 transition-all duration-300"
-              >
-                Sign In
-              </Link>
-              <button
-                className="w-full py-5 font-black text-white text-xl shadow-2xl active:scale-[0.98] transition-transform duration-200"
-                style={{
-                  borderRadius: "14px",
-                  border: "3px solid rgba(255, 255, 255, 0.20)",
-                  background:
-                    "linear-gradient(94deg, #66F9E6 7.78%, #305BC9 100%), #66F9E6",
-                  backdropFilter: "blur(37px)",
-                }}
-              >
-                Start Free Trial
-              </button>
+              {token ? (
+                <>
+                  <Link
+                    to="/dashboard/settings"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="flex items-center justify-center gap-3 py-5 px-6 text-white/90 font-bold text-xl border border-white/10 rounded-2xl bg-white/5 hover:bg-white/10 hover:text-[#66F9E6] transition-all duration-300"
+                  >
+                    <User size={22} aria-hidden />
+                    Profile
+                  </Link>
+                  <Link
+                    to="/dashboard/settings"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="flex items-center justify-center gap-3 py-5 px-6 text-white/90 font-bold text-xl border border-white/10 rounded-2xl bg-white/5 hover:bg-white/10 hover:text-[#66F9E6] transition-all duration-300"
+                  >
+                    <Settings size={22} aria-hidden />
+                    Settings
+                  </Link>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsMobileMenuOpen(false);
+                      dispatch(logout());
+                      navigate("/login");
+                    }}
+                    className="flex w-full items-center justify-center gap-3 py-5 px-6 font-bold text-xl rounded-2xl border border-[#FF4D4F]/40 bg-[#FF4D4F]/10 text-[#FF4D4F] hover:bg-[#FF4D4F]/25 hover:text-white active:scale-[0.98] transition-all duration-300"
+                  >
+                    <LogOut size={22} aria-hidden />
+                    Logout
+                  </button>
+                </>
+              ) : (
+                <>
+                  <Link
+                    to="/login"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="text-center py-5 text-white/90 font-bold text-xl border border-white/10 rounded-2xl bg-white/5 hover:bg-white/10 transition-all duration-300"
+                  >
+                    Sign In
+                  </Link>
+                  <button
+                    type="button"
+                    className="w-full py-5 font-black text-white text-xl shadow-2xl active:scale-[0.98] transition-transform duration-200"
+                    style={{
+                      borderRadius: "14px",
+                      border: "3px solid rgba(255, 255, 255, 0.20)",
+                      background:
+                        "linear-gradient(94deg, #66F9E6 7.78%, #305BC9 100%), #66F9E6",
+                      backdropFilter: "blur(37px)",
+                    }}
+                  >
+                    Start Free Trial
+                  </button>
+                </>
+              )}
             </div>
           </div>
         </div>
